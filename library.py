@@ -38,8 +38,6 @@ class Book:
             f"author={self.author!r}, "
             f"is_on_loan={self.is_on_loan})"
         )
-
-
 class HashTable:
     """
     Simple hash table with separate chaining.
@@ -90,3 +88,96 @@ class HashTable:
                 del bucket[i]
                 return True
         return False
+class BstNode:
+    """
+    Node in a binary search tree (BST) for indexing books by title.
+    key: lowercase title string
+    books: list of Book objects that share that title
+    """
+
+    def __init__(self, key: str, books: List["Book"]) -> None:
+        self.key = key
+        self.books = books
+        self.left: Optional["BstNode"] = None
+        self.right: Optional["BstNode"] = None
+
+
+class TitleIndexBst:
+    """
+    Binary search tree index for book titles.
+    Allows exact title searches and simple prefix searches.
+    """
+
+    def __init__(self) -> None:
+        self.root: Optional[BstNode] = None
+
+    def insert(self, title: str, book: Book) -> None:
+        """Insert a book into the BST using its title as the key."""
+        key = title.lower()
+        self.root = self._insert_recursive(self.root, key, book)
+
+    def _insert_recursive(
+        self,
+        node: Optional[BstNode],
+        key: str,
+        book: Book,
+    ) -> BstNode:
+        if node is None:
+            return BstNode(key, [book])
+
+        if key < node.key:
+            node.left = self._insert_recursive(node.left, key, book)
+        elif key > node.key:
+            node.right = self._insert_recursive(node.right, key, book)
+        else:
+            # same title: add book to this node's list
+            node.books.append(book)
+
+        return node
+
+    def search_exact(self, title: str) -> List[Book]:
+        """Find all books whose title exactly matches the given title."""
+        key = title.lower()
+        return self._search_exact_recursive(self.root, key)
+
+    def _search_exact_recursive(
+        self,
+        node: Optional[BstNode],
+        key: str,
+    ) -> List[Book]:
+        if node is None:
+            return []
+
+        if key < node.key:
+            return self._search_exact_recursive(node.left, key)
+        if key > node.key:
+            return self._search_exact_recursive(node.right, key)
+        return node.books
+
+    def search_prefix(self, prefix: str) -> List[Book]:
+        """
+        Find all books whose title starts with the given prefix
+        (case-insensitive).
+        """
+        prefix_key = prefix.lower()
+        found: List[Book] = []
+        self._search_prefix_recursive(self.root, prefix_key, found)
+        return found
+
+    def _search_prefix_recursive(
+        self,
+        node: Optional[BstNode],
+        prefix: str,
+        found: List[Book],
+    ) -> None:
+        if node is None:
+            return
+
+        # In-order style traversal, checking for prefix matches
+        if node.key.startswith(prefix):
+            found.extend(node.books)
+
+        if prefix <= node.key:
+            self._search_prefix_recursive(node.left, prefix, found)
+        if prefix >= node.key:
+            self._search_prefix_recursive(node.right, prefix, found)
