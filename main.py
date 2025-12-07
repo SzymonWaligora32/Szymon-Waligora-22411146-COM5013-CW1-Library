@@ -1,70 +1,111 @@
-from library import Book, HashTable, TitleIndexBst
+from library import Library
+
+
+def print_menu() -> None:
+    print("\n--- Library Menu ---")
+    print("1. Add a new book")
+    print("2. Search book by ID")
+    print("3. Search book by exact title")
+    print("4. Search book by title prefix")
+    print("5. Borrow a book")
+    print("6. Return a book")
+    print("7. List all books")
+    print("8. List all books sorted by title")
+    print("9. List overdue books")
+    print("0. Exit")
 
 
 def main() -> None:
-    test_book = Book("B001", "Algorithms", "Sedgewick", "CS")
-    print(test_book)
+    print("Starting library program...")  # debug line so we see *something*
+    library = Library()
 
+    while True:
+        print_menu()
+        choice = input("Enter your choice: ").strip()
 
-if __name__ == "__main__":
-    main()
+        if choice == "1":
+            book_id = input("Enter book ID: ").strip()
+            title = input("Enter title: ").strip()
+            author = input("Enter author: ").strip()
+            subject = input("Enter subject: ").strip()
+            try:
+                library.add_book(book_id, title, author, subject)
+                print("Book added.")
+            except ValueError as error:
+                print(f"Error: {error}")
 
-def main() -> None:
-    # create the hash table index for books
-    id_index = HashTable()
+        elif choice == "2":
+            book_id = input("Enter book ID to search: ").strip()
+            book = library.get_book_by_id(book_id)
+            if book is None:
+                print("Book not found.")
+            else:
+                print("Found:", book)
 
-    # create a few example books
-    book1 = Book("B001", "Algorithms", "Sedgewick", "CS")
-    book2 = Book("B002", "Introduction to Algorithms", "Cormen", "CS")
+        elif choice == "3":
+            title = input("Enter exact title to search: ").strip()
+            results = library.search_title_exact(title)
+            if not results:
+                print("No books found.")
+            else:
+                print("Books found:")
+                for book in results:
+                    print("  ", book)
 
-    # store books in the hash table using book_id as the key
-    id_index.put(book1.book_id, book1)
-    id_index.put(book2.book_id, book2)
+        elif choice == "4":
+            prefix = input("Enter title prefix to search: ").strip()
+            results = library.search_title_prefix(prefix)
+            if not results:
+                print("No books found.")
+            else:
+                print("Books found:")
+                for book in results:
+                    print("  ", book)
 
-    # retrieve a book by id
-    fetched = id_index.get("B001")
-    print("Fetched B001:", fetched)
+        elif choice == "5":
+            book_id = input("Enter book ID to borrow: ").strip()
+            user_id = input("Enter your user ID: ").strip()
+            message = library.borrow_book(book_id, user_id)
+            print(message)
 
-    # try a non-existing id
-    missing = id_index.get("B999")
-    print("Fetched B999 (should be None):", missing)
+        elif choice == "6":
+            book_id = input("Enter book ID to return: ").strip()
+            message = library.return_book(book_id)
+            print(message)
 
+        elif choice == "7":
+            books = library.list_all_books()
+            if not books:
+                print("No books in library.")
+            else:
+                print("All books:")
+                for book in books:
+                    print("  ", book)
 
-if __name__ == "__main__":
-    main()
+        elif choice == "8":
+            books = library.list_books_sorted_by_title()
+            if not books:
+                print("No books in library.")
+            else:
+                print("Books sorted by title:")
+                for book in books:
+                    print("  ", book)
 
-def main() -> None:
-    # create indexes
-    id_index = HashTable()
-    title_index = TitleIndexBst()
+        elif choice == "9":
+            overdue_books = library.list_overdue_books()
+            if not overdue_books:
+                print("No overdue books.")
+            else:
+                print("Overdue books:")
+                for book in overdue_books:
+                    print("  ", book)
 
-    # create some example books
-    book1 = Book("B001", "Algorithms", "Sedgewick", "CS")
-    book2 = Book("B002", "Introduction to Algorithms", "Cormen", "CS")
-    book3 = Book("B003", "Algebra", "Stewart", "Maths")
-    book4 = Book("B004", "Artificial Intelligence", "Russell", "CS")
+        elif choice == "0":
+            print("Goodbye!")
+            break
 
-    # add books to both indexes
-    for book in (book1, book2, book3, book4):
-        id_index.put(book.book_id, book)
-        title_index.insert(book.title, book)
-
-    # test exact search
-    print("Exact title search for 'Algorithms':")
-    results_exact = title_index.search_exact("Algorithms")
-    for b in results_exact:
-        print("  ", b)
-
-    # test prefix search
-    print("\nPrefix search for 'Al':")
-    results_prefix = title_index.search_prefix("Al")
-    for b in results_prefix:
-        print("  ", b)
-
-    # still show an ID-based lookup using hash table
-    print("\nLookup by ID 'B003':")
-    fetched = id_index.get("B003")
-    print("  ", fetched)
+        else:
+            print("Invalid choice. Please try again.")
 
 
 if __name__ == "__main__":
