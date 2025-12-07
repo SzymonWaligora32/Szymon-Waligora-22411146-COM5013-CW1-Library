@@ -1,4 +1,4 @@
-from library import Book
+from library import Book, HashTable
 
 
 def main() -> None:
@@ -8,9 +8,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-from library import Book, HashTable
-
-
+    
 def main() -> None:
     # create the hash table index for books
     id_index = HashTable()
